@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+enum OAuthProvider {
+  GOOGLE
+  KAKAO
+  NAVER
+  
+  @@schema("auth")
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+  PENDING
+
+  @@schema("auth")
+}
+
+enum ItemType {
+  CONSUMABLE   // 소모품
+  EQUIPMENT    // 장비
+  MATERIAL     // 재료
+  ETC          // 기타
+
+  @@schema("game")
+}
+
+enum ItemGrade {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+
+  @@schema("game")
+}
+
+enum EquipmentSlot {
+  WEAPON
+  ARMOR
+  HELMET
+  RING
+
+  @@schema("game")
+}
+
+datasource db {
+  provider = "postgresql"  
+  schemas  = ["auth", "game","admin"]  
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())  
+  email     String?   @unique
+  password  String?   // 로컬 로그인용 (OAuth면 null)
+
+  status    UserStatus @default(PENDING)
+
+  oauths    OAuthAccount[]
+  emailVerifications EmailVerification[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@schema("auth")
+}
+
+model OAuthAccount {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider        OAuthProvider
+  providerUserId  String
+
+  createdAt       DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+
+  @@schema("auth")
+}
+
+model EmailVerification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@schema("auth")
+}
+
+model Item {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Int
+
+  type        ItemType
+  grade       ItemGrade
+
+  slot        EquipmentSlot?   // 장비 전용
+  stackable   Boolean     @default(true)
+  maxStack    Int?
+
+  sellable    Boolean     @default(true)
+
+  iconUrl     String?
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  userItems   UserItem[]
+
+  @@schema("game")
+}
+
+model UserProfile {
+  id        Int      @id
+  nickname  String  
+  createdAt DateTime @default(now())
+
+  items     UserItem[]
+
+  @@schema("game")
+}
+
+model UserItem{
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  itemId     Int
+  quantity   Int      @default(1)
+
+  user       UserProfile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item       Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+    
+  @@index([userId])
+  @@index([itemId])
+
+  @@schema("game")
+}
+
+enum AdminRole {
+  SUPER
+  OPERATOR
+  VIEWER
+
+  @@schema("admin")
+}
+
+model Admin {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      AdminRole @default(OPERATOR)
+  createdAt DateTime  @default(now())
+
+  @@schema("admin")
+}
