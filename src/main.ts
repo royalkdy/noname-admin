@@ -22,15 +22,12 @@ async function bootstrap() {
     }),
   );
 
-  // local용
-  app.setGlobalPrefix('api/admin');
+  const prefix = process.env.GLOBAL_PREFIX;
+  if (prefix) {
+    app.setGlobalPrefix(prefix);
+  }
   const host = process.env.SERVER_HOST ?? '127.0.0.1';
   const port = Number(process.env.SERVER_PORT ?? 3000);
-
-  // // docker용
-  // app.setGlobalPrefix('api/auth');
-  // const host = '0.0.0.0';
-  // const port = 3000;
 
   await app.listen(port, host);
 }

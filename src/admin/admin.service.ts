@@ -9,6 +9,14 @@ export class AdminService {
   async grantItemToUser(
     payload: GrantItemPayload,
   ): Promise<{ itemId: number; quantity: number }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.userId },
+    });
+
+    if (!user) {
+      throw new Error('USER_NOT_FOUND');
+    }
+
     const result = await this.prisma.$transaction(async (tx) => {
       const item = await tx.item.findUnique({
         where: { id: payload.itemId },
