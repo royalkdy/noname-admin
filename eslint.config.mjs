@@ -8,7 +8,6 @@ export default [
   {
     ignores: ['dist', 'node_modules'],
   },
-
   // 기본 JS 규칙
   eslint.configs.recommended,
 
