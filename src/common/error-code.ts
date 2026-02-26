@@ -6,6 +6,7 @@ export const ErrorCode = {
   USER_ALREADY_EXISTS: 'USER_ALREADY_EXISTS',
   INVALID_SESSION: 'INVALID_SESSION',
   EMAIL_VERIFICATION_REQUIRED: 'EMAIL_VERIFICATION_REQUIRED',
+  ADMIN_APPROVAL_REQUIRED: 'ADMIN_APPROVAL_REQUIRED',
 } as const;
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];

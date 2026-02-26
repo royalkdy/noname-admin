@@ -1,20 +1,10 @@
-import {
-  Injectable,
-  Inject,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
-import type { SessionRedisClient } from './session-redis.provider';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
-  constructor(
-    private readonly config: ConfigService,
-    @Inject('SESSION_REDIS')
-    private readonly sessionClient: SessionRedisClient,
-  ) {}
+  constructor(private readonly config: ConfigService) {}
   private dataClient!: Redis;
 
   onModuleInit() {
@@ -27,9 +17,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   getDataClient(): Redis {
     return this.dataClient;
-  }
-  getSessionClient(): SessionRedisClient {
-    return this.sessionClient;
   }
 
   async onModuleDestroy() {

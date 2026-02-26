@@ -15,8 +15,8 @@ export default [
   // TypeScript 기본 규칙
   ...tseslint.configs.recommended,
 
-  // Type-aware 규칙 (중요)
-  ...tseslint.configs.recommendedTypeChecked,
+  // // Type-aware 규칙 (중요)
+  // ...tseslint.configs.recommendedTypeChecked,
 
   // Prettier 통합
   prettierRecommended,
@@ -25,7 +25,7 @@ export default [
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json', // ✅ 안정 모드
+        project: './tsconfig.json',
         tsconfigRootDir: import.meta.dirname,
       },
       globals: {

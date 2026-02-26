@@ -1,17 +1,18 @@
-import { IsEmail, IsInt, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class LoginDto {
-  @Type(() => Number)
-  @IsInt()
-  id!: number;
-}
-
 export class LocalLoginDto {
-  @Type(() => String)
   @IsEmail()
   email!: string;
+
   @IsString()
+  @MinLength(4)
   password!: string;
 }
 
@@ -19,7 +20,15 @@ export class LocalSignUpDto {
   @Type(() => String)
   @IsEmail()
   email!: string;
-  @Type(() => String)
-  @IsString()
+
+  @MinLength(8)
+  @MaxLength(64)
+  @Matches(/[!@#$%^&*]/, {
+    message: '특수문자를 최소 1개 포함해야 합니다.',
+  })
   password!: string;
+
+  @IsString()
+  @MaxLength(6)
+  name!: string;
 }

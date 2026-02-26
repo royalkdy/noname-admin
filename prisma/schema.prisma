@@ -20,6 +20,14 @@ enum UserStatus {
   @@schema("auth")
 }
 
+enum AdminStatus {
+  ACTIVE  
+  PENDING
+  BLOCKED
+
+  @@schema("admin")
+}
+
 enum ItemType {
   CONSUMABLE   // 소모품
   EQUIPMENT    // 장비
@@ -167,6 +175,7 @@ model Admin {
   name      String
   email     String    @unique
   password  String
+  status    AdminStatus @default(PENDING)
   role      AdminRole @default(OPERATOR)
   createdAt DateTime  @default(now())
 
