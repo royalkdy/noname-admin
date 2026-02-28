@@ -3,6 +3,17 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "postgresql"  
+  schemas  = ["auth", "game","admin"]  
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+// region Auth Models
 enum OAuthProvider {
   GOOGLE
   KAKAO
@@ -20,14 +31,53 @@ enum UserStatus {
   @@schema("auth")
 }
 
-enum AdminStatus {
-  ACTIVE  
-  PENDING
-  BLOCKED
+model UserAccount {
+  id        Int       @id @default(autoincrement())  
+  email     String?   @unique
+  password  String?   // 로컬 로그인용 (OAuth면 null)
 
-  @@schema("admin")
+  status    UserStatus @default(PENDING)
+
+  oauths    OAuthAccount[]
+  emailVerifications EmailVerification[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@schema("auth")
 }
 
+model OAuthAccount {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            UserAccount     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider        OAuthProvider
+  providerUserId  String
+
+  createdAt       DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+
+  @@schema("auth")
+}
+
+model EmailVerification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+
+  user      UserAccount     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@schema("auth")
+}
+
+// region Game Models
 enum ItemType {
   CONSUMABLE   // 소모품
   EQUIPMENT    // 장비
@@ -53,61 +103,6 @@ enum EquipmentSlot {
   RING
 
   @@schema("game")
-}
-
-datasource db {
-  provider = "postgresql"  
-  schemas  = ["auth", "game","admin"]  
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-model User {
-  id        Int       @id @default(autoincrement())  
-  email     String?   @unique
-  password  String?   // 로컬 로그인용 (OAuth면 null)
-
-  status    UserStatus @default(PENDING)
-
-  oauths    OAuthAccount[]
-  emailVerifications EmailVerification[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@schema("auth")
-}
-
-model OAuthAccount {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  provider        OAuthProvider
-  providerUserId  String
-
-  createdAt       DateTime @default(now())
-
-  @@unique([provider, providerUserId])
-  @@index([userId])
-
-  @@schema("auth")
-}
-
-model EmailVerification {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  token     String   @unique
-  expiresAt DateTime
-  verified  Boolean  @default(false)
-
-  user      User     @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@schema("auth")
 }
 
 model Item {
@@ -162,10 +157,21 @@ model UserItem{
   @@schema("game")
 }
 
+
+// region Admin Models
 enum AdminRole {
   SUPER
   OPERATOR
   VIEWER
+
+  @@schema("admin")
+}
+
+
+enum AdminStatus {
+  ACTIVE  
+  PENDING
+  BLOCKED
 
   @@schema("admin")
 }

@@ -4,12 +4,12 @@ import { GrantItemPayload } from './admin.type';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async grantItemToUser(
     payload: GrantItemPayload,
   ): Promise<{ itemId: number; quantity: number }> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaService.userProfile.findUnique({
       where: { id: payload.userId },
     });
 
@@ -17,7 +17,7 @@ export class AdminService {
       throw new Error('USER_NOT_FOUND');
     }
 
-    const result = await this.prisma.$transaction(async (tx) => {
+    const result = await this.prismaService.$transaction(async (tx) => {
       const item = await tx.item.findUnique({
         where: { id: payload.itemId },
       });
