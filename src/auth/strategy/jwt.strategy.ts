@@ -29,6 +29,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (admin.status === AdminStatus.BLOCKED)
       throw new ForbiddenException(ErrorCode.BLOCKED_USER);
 
-    return { id: admin.id, role: toDomainAdminRole(admin.role) };
+    return {
+      id: admin.id,
+      role: toDomainAdminRole(admin.role),
+      email: admin.email,
+    };
   }
 }

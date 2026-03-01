@@ -37,7 +37,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let errorCode: string = 'Internal server error';
     let stack: string | undefined;
     const body: unknown = request.body ?? {};
-    const dateTime: string = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const dateTime: string = dayjs().tz().format('YYYY-MM-DD HH:mm:ss');
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -73,7 +73,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const userId = request.user as number | undefined;
     //TODO: Auth 구현이후 UserID 추가
     if (!shouldIgnore) {
-      this.logger.writeErrorLog(
+      this.logger.writeApiErrorLog(
         `[API_ERROR] [${status}] ${dateTime} UID:${userId ?? ''} method:${request.method}, url:${request.url}, errorCode:${JSON.stringify(errorCode)}, body:${JSON.stringify(body)}`,
       );
     }

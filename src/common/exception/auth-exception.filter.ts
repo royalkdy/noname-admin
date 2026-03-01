@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthLoggerService } from '@/common/logger/logger.service';
+import { LoggerService } from '@/common/logger/logger.service';
 import dayjs from '@/common/utils/dayjs.util';
 import { ErrorCode } from '../error-code';
 
@@ -18,7 +18,7 @@ interface ExceptionResponse {
 
 @Catch(HttpException)
 export class AuthExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: AuthLoggerService) {}
+  constructor(private readonly logger: LoggerService) {}
   catch(exception: HttpException, host: ArgumentsHost) {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
@@ -27,7 +27,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorCode: string = 'Internal server error';
     const body: unknown = request.body ?? {};
-    const dateTime: string = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const dateTime: string = dayjs().tz().format('YYYY-MM-DD HH:mm:ss');
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -57,7 +57,7 @@ export class AuthExceptionFilter implements ExceptionFilter {
 
     //TODO: Auth 구현이후 UserID 추가
     if (!shouldIgnore) {
-      this.logger.writeErrorLog(
+      this.logger.writeAuthErrorLog(
         `[AUTH_ERROR] [${status}] ${dateTime} method:${request.method}, url:${request.url}, errorCode:${JSON.stringify(errorCode)}, body:${JSON.stringify(body)}`,
       );
     }

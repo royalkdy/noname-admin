@@ -5,13 +5,13 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { LoggerService } from '../logger/logger.service';
-import dayjs from 'dayjs';
-import { AdminRole } from '../../auth/types/admin-role.enum';
+import dayjs from '@/common/utils/dayjs.util';
 import { SKIP_API_LOG } from '../decorators/skip-api-log.decorator';
 import { Reflector } from '@nestjs/core/services/reflector.service';
+import type { AuthenticatedAdmin } from '@/auth/types/auth.types';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -28,6 +28,7 @@ export class ApiResponseInterceptor<T> implements NestInterceptor<
     private readonly logger: LoggerService,
     private readonly reflector: Reflector,
   ) {}
+
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
@@ -40,36 +41,62 @@ export class ApiResponseInterceptor<T> implements NestInterceptor<
       context.getClass(),
     ]);
 
-    const admin = request.user as { id: number; role: AdminRole } | undefined;
+    if (skip) {
+      return next.handle().pipe(
+        map((data) => ({
+          success: true,
+          data,
+          dateTime: dayjs().tz().format('YYYY-MM-DD HH:mm:ss'),
+        })),
+      );
+    }
+
+    const adminUser = request.user as AuthenticatedAdmin | undefined;
+
+    const requestBody =
+      typeof request.body === 'object' && request.body !== null
+        ? (request.body as Record<string, unknown>)
+        : {};
+
+    const requestTime = dayjs().tz();
+    const logMessage =
+      'API:[REQUEST] ' +
+      JSON.stringify({
+        id: request.requestId,
+        date: requestTime.format('YYYY-MM-DD HH:mm:ss'),
+        account: adminUser?.email ?? 'ANONYMOUS',
+        path: request.path,
+        request: requestBody,
+      }) +
+      '\n';
+    // Request
+    console.log(logMessage);
+    this.logger.writeApiLog(logMessage);
 
     return next.handle().pipe(
-      tap((data) => {
-        //로그 스킵 (auth interceptor에서 처리함)
-        if (skip) return;
-
-        const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
-
-        const safeBody = { ...request.body };
-        delete safeBody.password;
-
-        let logData = {
-          date: now,
-          adminId: admin?.id ?? 'ANONYMOUS',
-          path: request.url,
-          method: request.method,
-          body: safeBody,
-          response: data,
-        };
-
-        const logMessage = '[API_ACTION] ' + JSON.stringify(logData);
+      map((data) => {
+        const responseTime = dayjs().tz();
+        const elapsedTimeMs = responseTime.diff(requestTime, 'millisecond');
+        const logMessage =
+          'API:[RESPONSE] ' +
+          JSON.stringify({
+            id: request.requestId,
+            date: responseTime.format('YYYY-MM-DD HH:mm:ss'),
+            account: adminUser?.email ?? 'ANONYMOUS',
+            path: request.path,
+            response: data,
+            elapsedTimeMs,
+          }) +
+          '\n';
         console.log(logMessage);
-        this.logger.writeActionLog(logMessage);
+        this.logger.writeApiLog(logMessage);
+
+        return {
+          success: true,
+          data,
+          dateTime: responseTime.format('YYYY-MM-DD HH:mm:ss'),
+        };
       }),
-      map((data) => ({
-        success: true,
-        data,
-        dateTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      })),
     );
   }
 }
