@@ -9,6 +9,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { AdminStatus } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ErrorCode } from '@/common/error-code';
+import { AdminRole } from '@/auth/types/admin-role.enum';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateLocal(email: string, password: string) {
+  async validate(email: string, password: string) {
     const admin = await this.prismaService.admin.findUnique({
       where: { email },
     });
@@ -37,15 +38,18 @@ export class AuthService {
   }
 
   // JWT 발급
-  async issueAccessToken(userId: number): Promise<{ accessToken: string }> {
-    const payload = { sub: userId };
+  async issueAccessToken(
+    userId: number,
+    role: AdminRole,
+  ): Promise<{ accessToken: string }> {
+    const payload = { sub: userId, role };
 
     return {
       accessToken: this.jwtService.sign(payload),
     };
   }
 
-  async signUpLocal(email: string, password: string, name: string) {
+  async createAdmin(email: string, password: string, name: string) {
     const isExistUser = await this.prismaService.admin.findUnique({
       where: { email },
     });

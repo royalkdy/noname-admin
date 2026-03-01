@@ -132,7 +132,7 @@ model Item {
 
 model UserProfile {
   id        Int      @id
-  nickname  String  
+  nickname  String   @unique
   createdAt DateTime @default(now())
 
   items     UserItem[]

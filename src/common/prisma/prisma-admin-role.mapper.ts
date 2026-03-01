@@ -1,5 +1,5 @@
 import { AdminRole as PrismaUserRole } from '@prisma/client';
-import { AdminRole } from '../enums/admin-role.enum';
+import { AdminRole } from '../../auth/types/admin-role.enum';
 
 export function toDomainAdminRole(role: PrismaUserRole): AdminRole {
   switch (role) {

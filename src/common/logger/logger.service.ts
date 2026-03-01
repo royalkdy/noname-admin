@@ -9,31 +9,28 @@ export class LoggerService {
   private debugLogFilePath: string;
 
   constructor(private readonly configService: ConfigService) {
-    const logDir = this.configService.get<string>('SERVER_LOG_PATH') ?? 'logs';
+    const logDir = this.configService.get<string>('API_LOG_PATH') ?? 'logs';
     // 디렉토리 없으면 생성
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
     }
 
-    this.errorLogFilePath = path.join(logDir, 'error.log');
+    this.errorLogFilePath = path.join(logDir, 'api_error.log');
     this.debugLogFilePath = path.join(logDir, 'userAction.log');
   }
-  error(message: string) {
-    const errorLog = '[ERROR] ' + message + '\n';
-    console.log('errorLog:' + errorLog);
+
+  writeErrorLog(message: string) {
     // 파일에 append (비동기)
-    fs.appendFile(this.errorLogFilePath, errorLog, (err) => {
+    fs.appendFile(this.errorLogFilePath, message, (err) => {
       if (err) {
         console.error('로그 파일 쓰기 실패:', err);
       }
     });
   }
 
-  userActionLog(message: string) {
-    const userActionLog = '[USER_ACTION] ' + message + '\n';
-    console.log('DebugLog:' + userActionLog);
+  writeActionLog(message: string) {
     // 파일에 append (비동기)
-    fs.appendFile(this.debugLogFilePath, userActionLog, (err) => {
+    fs.appendFile(this.debugLogFilePath, message, (err) => {
       if (err) {
         console.error('로그 파일 쓰기 실패:', err);
       }
@@ -46,8 +43,7 @@ export class AuthLoggerService {
   private logFilePath: string;
 
   constructor(private readonly configService: ConfigService) {
-    const logDir =
-      this.configService.get<string>('AUTH_SERVER_LOG_PATH') ?? 'logs';
+    const logDir = this.configService.get<string>('AUTH_LOG_PATH') ?? 'logs';
     // 디렉토리 없으면 생성
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
@@ -55,11 +51,9 @@ export class AuthLoggerService {
 
     this.logFilePath = path.join(logDir, 'auth_error.log');
   }
-  error(message: string) {
-    const errorLog = '[ERROR]' + message + '\n';
-    console.log('auth_error:' + errorLog);
+  writeErrorLog(message: string) {
     // 파일에 append (비동기)
-    fs.appendFile(this.logFilePath, errorLog, (err) => {
+    fs.appendFile(this.logFilePath, message, (err) => {
       if (err) {
         console.error('로그 파일 쓰기 실패:', err);
       }

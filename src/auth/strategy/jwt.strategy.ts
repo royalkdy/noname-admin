@@ -8,7 +8,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ErrorCode } from '@/common/error-code';
 import { AdminStatus } from '@prisma/client';
-import { AdminRole } from '@/common/enums/admin-role.enum';
+import { AdminRole } from '@/auth/types/admin-role.enum';
 import { toDomainAdminRole } from '@/common/prisma/prisma-admin-role.mapper';
 
 @Injectable()
@@ -25,11 +25,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       where: { id: payload.sub },
     });
 
-    if (!admin) throw new UnauthorizedException(ErrorCode.USER_NOT_FOUND);
+    if (!admin) throw new UnauthorizedException(ErrorCode.ADMIN_USER_NOT_FOUND);
     if (admin.status === AdminStatus.BLOCKED)
       throw new ForbiddenException(ErrorCode.BLOCKED_USER);
 
-    console.log('admin role', admin.role);
-    return { adminId: admin.id, role: toDomainAdminRole(admin.role) };
+    return { id: admin.id, role: toDomainAdminRole(admin.role) };
   }
 }

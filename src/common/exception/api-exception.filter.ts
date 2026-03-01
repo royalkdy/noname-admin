@@ -73,8 +73,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const userId = request.user as number | undefined;
     //TODO: Auth 구현이후 UserID 추가
     if (!shouldIgnore) {
-      this.logger.error(
-        `[${status}] ${dateTime} UID:${userId ?? ''} method:${request.method}, url:${request.url}, errorCode:${JSON.stringify(errorCode)}, body:${JSON.stringify(body)}`,
+      this.logger.writeErrorLog(
+        `[API_ERROR] [${status}] ${dateTime} UID:${userId ?? ''} method:${request.method}, url:${request.url}, errorCode:${JSON.stringify(errorCode)}, body:${JSON.stringify(body)}`,
       );
     }
 

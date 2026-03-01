@@ -4,7 +4,8 @@ import type { GrantItemPayload } from './admin.type';
 import { JwtAuthGuard } from '@/auth/guard/jwt.guard';
 import { RolesGuard } from '@/auth/guard/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { AdminRole } from '@/common/enums/admin-role.enum';
+import { AdminRole } from '@/auth/types/admin-role.enum';
+import { CurrentAdmin } from '@/common/decorators/current-admin.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
@@ -13,7 +14,7 @@ export class AdminController {
 
   @Roles(AdminRole.SUPER)
   @Post('grant-item')
-  async grantItem(@Body() body: GrantItemPayload) {
+  async grantItem(@CurrentAdmin() admin: any, @Body() body: GrantItemPayload) {
     const { userId, itemId, quantity } = body;
     await this.adminService.grantItemToUser({
       userId,

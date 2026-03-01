@@ -1,4 +1,3 @@
-// common/auth/roles.guard.ts
 import {
   Injectable,
   CanActivate,
@@ -7,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '@/common/decorators/roles.decorator';
-import { AdminRole } from '@/common/enums/admin-role.enum';
+import { AdminRole } from '@/auth/types/admin-role.enum';
 import type { Request } from 'express';
 
 @Injectable()

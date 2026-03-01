@@ -4,8 +4,8 @@ import {
   LoggerService,
   AuthLoggerService,
 } from '@/common/logger/logger.service';
-import { GlobalExceptionFilter } from '@/common/exception/global-exception.filter';
-import { SuccessResponseInterceptor } from './interceptors/success-response.interceptor';
+import { GlobalExceptionFilter } from '@/common/exception/api-exception.filter';
+import { ApiResponseInterceptor } from './interceptors/api-success.interceptor';
 
 @Module({
   providers: [
@@ -16,7 +16,7 @@ import { SuccessResponseInterceptor } from './interceptors/success-response.inte
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SuccessResponseInterceptor,
+      useClass: ApiResponseInterceptor,
     },
     AuthLoggerService,
   ],

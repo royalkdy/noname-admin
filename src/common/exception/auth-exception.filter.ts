@@ -57,8 +57,8 @@ export class AuthExceptionFilter implements ExceptionFilter {
 
     //TODO: Auth 구현이후 UserID 추가
     if (!shouldIgnore) {
-      this.logger.error(
-        `[${status}] ${dateTime} method:${request.method}, url:${request.url}, errorCode:${JSON.stringify(errorCode)}, body:${JSON.stringify(body)}`,
+      this.logger.writeErrorLog(
+        `[AUTH_ERROR] [${status}] ${dateTime} method:${request.method}, url:${request.url}, errorCode:${JSON.stringify(errorCode)}, body:${JSON.stringify(body)}`,
       );
     }
 
